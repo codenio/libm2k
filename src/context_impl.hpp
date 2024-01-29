@@ -23,7 +23,6 @@
 #define CONTEXT_IMPL_HPP
 
 #include <libm2k/context.hpp>
-#include <libm2k/lidar.hpp>
 #include <libm2k/generic.hpp>
 #include <libm2k/m2kglobal.hpp>
 #include <libm2k/utils/enums.hpp>
@@ -51,7 +50,6 @@ namespace digital {
 
 namespace context {
 class Context;
-class Lidar;
 class M2k;
 
 class ContextImpl : public virtual Context {
@@ -79,7 +77,6 @@ public:
 
 	libm2k::context::M2k* toM2k() override;
 	libm2k::context::Generic* toGeneric() override;
-	libm2k::context::Lidar* toLidar() override;
 
 	static bool iioChannelHasAttribute(iio_channel *chn, const std::string &attr);
 	static bool iioDevHasAttribute(iio_device *dev, const std::string &attr);
@@ -90,6 +87,7 @@ public:
 	const struct libm2k::IIO_CONTEXT_VERSION getIioContextVersion() override;
 	struct iio_context *getIioContext() override;
 	void setTimeout(unsigned int timeout) override;
+	void setContextOwnership(bool ownsContext);
 
 protected:
 	struct iio_context* m_context;
@@ -98,14 +96,18 @@ protected:
 
 	bool isIioDeviceBufferCapable(std::string dev_name);
 	std::vector<std::pair<std::string, std::string> > getIioDevByChannelAttrs(std::vector<std::string> attr_list);
+	std::vector<std::pair<std::string, std::string>> getHwmonDevices();
 	libm2k::utils::DEVICE_TYPE getIioDeviceType(std::string dev_name);
 	libm2k::utils::DEVICE_DIRECTION getIioDeviceDirection(std::string dev_name);
+
+
 private:
 	void initializeContextAttributes();
 
 	std::string m_uri;
 	std::string m_name;
 	bool m_sync;
+	bool m_ownsContext;
 };
 }
 }

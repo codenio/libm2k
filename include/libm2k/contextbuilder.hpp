@@ -33,7 +33,6 @@
 enum ContextTypes {
 	CtxFMCOMMS,
 	CtxM2K,
-	CtxLIDAR,
 	Other
 };
 
@@ -110,9 +109,15 @@ private:
 	static Context* buildContext(ContextTypes type,
 		std::string uri,
 		struct iio_context *ctx,
-		bool sync);
+		bool sync,
+		bool ownsContext = false);
 	static bool m_disable_logging;
 
+	static std::map<std::string, int> reference_count;
+	static void incrementReferenceCount(std::string uri);
+	static void decrementReferenceCount(std::string uri);
+	static bool checkLastReference(std::string uri);
+	static Context* searchInConnectedDevices(std::string uri);
 };
 
 /**

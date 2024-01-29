@@ -26,7 +26,7 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.18.0")
 endif()
 
 set(LIBM2K_VERSION_MAJOR 0)
-set(LIBM2K_VERSION_MINOR 5)
+set(LIBM2K_VERSION_MINOR 7)
 set(LIBM2K_VERSION_PATCH 0)
 set(LIBM2K_VERSION "${LIBM2K_VERSION_MAJOR}.${LIBM2K_VERSION_MINOR}.${LIBM2K_VERSION_PATCH}")
 
@@ -39,6 +39,9 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 # build a shared library by default
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
+
+# setup install location for MacOS frameworks
+set(OSX_INSTALL_FRAMEWORKSDIR "/Library/Frameworks" CACHE STRING "Installation directory for frameworks")
 
 # generate docs by default
 option(ENABLE_DOC "Generate documentation with Doxygen" OFF)
@@ -103,13 +106,17 @@ endif()
 
 #Enable or disable exception handling
 if (NOT ENABLE_EXCEPTIONS)
-	remove_definitions("-fexceptions")
-	add_definitions("-fno-exceptions")
 	add_definitions(-D_EXCEPTIONS=0)
+	if(NOT MSVC)
+		remove_definitions("-fexceptions")
+		add_definitions("-fno-exceptions")
+	endif()
 else()
-	remove_definitions("-fno-exceptions")
-	add_definitions("-fexceptions")
 	add_definitions(-D_EXCEPTIONS=1)
+	if(NOT MSVC)
+		remove_definitions("-fno-exceptions")
+		add_definitions("-fexceptions")
+	endif()
 endif()
 
 configure_file(${CMAKE_SOURCE_DIR}/version.hpp.cmakein ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/version.hpp @ONLY)
@@ -166,7 +173,7 @@ find_path(IIO_INCLUDE_DIRS iio.h)
 
 #set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS}")
 if (NOT WIN32)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+	set(CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS}")
 endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -std=c++11")
 
